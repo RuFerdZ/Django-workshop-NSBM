@@ -1,0 +1,278 @@
+0. pip install django
+1. create DJango project 
+>django-admin startproject RegFirstProject
+
+2. Now check (or verify) the folder where you have create the project....
+in my computer I have created the same in D:\DJangoWorkshopProject\RegFirstProject
+Here you will find Manage.py and project_folder (inside this you will find multiple (five) python files...)
+
+What is the role of these python files:
+manage.py: basic command utility file for django
+__init__.py:__init__ is by default required here for initialization...and also to create a package and module
+urls.py: for all possible urls or paths for our webpage
+settings.py: for configuration setting
+
+3. Check the server is working or not??
+go inside the project folder...like....
+
+>cd RegFirstProject
+>RegFirstProject>python manage.py runserver
+
+4. Now go to the browser and type http://127.0.0.1:8000/
+you will see the text....."The install worked successfully! Congratulations!"
+WebServer is started
+
+5. if you want to stop your localhost web server..
+type ctrl+c
+
+
+Application in project: create new application inside the project
+6. there are some python files required in our application
+views.py: decides the user interface.....we will define different function here that will be called by URLS....such URLS are defined in url.py files
+
+models.py: for define data model (or data settings)
+
+form.py: it is required to create django form...like html form
+
+7. go inside the project folder....run following command
+Synatx:python manage.py startapp appname
+
+python manage.py startapp RegFirstApp
+
+inside the project folder a folder named as RegFirstApp will also be appeared it contains multiple python files...
+
+8. after this open the settings.py iand add the above application as follows in application definition section..
+
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'RegFirstApp'             # ................this has been added
+
+9. Now open the view.py file in editor
+and write following statements in the file... after from django.shortcuts import render line
+
+from django.http import HttpResponse
+# Create your views here.
+
+def Hello(request):
+	msg="Welcome to my First Application"
+	return HttpResponse(msg)
+
+10. Now open the url.py from project folder
+edit this file with some lines like as follows:
+
+from django.contrib import admin
+from django.urls import path
+from RegFirstApp.views import Hello
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('Hello/',Hello)
+]
+
+here in line path('Hello/',Hello)....first Hello is for URL and second hello is for function which we have created in view.py
+
+11. Now start the server with in project folder 
+python manage.py runserver
+
+12. Now check the application on web browser with following URL
+http://127.0.0.1:8000/Hello/
+
+you will see the function Hello is called now and the statement "Welcome to my First Application" will be appeared
+
+Congratulation....now your first web application is perfectly working
+
+13. Now we want a HTTP file...so that we can return content as response
+create a folder named as "templates" in app folder
+and then create html files in this folder only......
+
+it means all sort of html files will be created only in template folder
+
+14. Now create an index.html file in template folder like as follows:
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My HTML FILE</title>
+</head>
+<body>
+	<h1>This is html file used by django View</h1>
+</body>
+</html>
+
+15. now update the views .py file with new function
+
+def index(request):
+	return render(request,'index.html')
+
+16. Now go to urls.py
+
+from RegFirstApp.views import Hello,index
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('Hello/',Hello),
+    path('index/',index) #....add this path after putting comma at the end of above statement
+
+16. Now go to views.py
+and update the index function as follows:
+
+def index(request):
+	return render(request,'index.html', {"name":"Anil Saroliya"})
+
+also update the index.html file as follows:
+
+<html>
+<head>
+	<title>My HTML FILE</title>
+</head>
+<body>
+	<h1>This is html file used by django View</h1>
+	<h1>User Name {{name}}</h1>
+</body>
+</html>
+
+You will see on the webpage http://127.0.0.1:8000/index/ following output:
+<make sure that your web server is already started if not then you have to start it again>
+This is html file used by django View
+User Name Anil Saroliya
+......................................................................................................................................................................................
+......................................................................................................................................................................................
+
+Now we are going to work on usage of data models in django.....
+
+database we are going to use sqllite already available with django framework
+
+install dbbrowser for sqllite
+
+
+17. Now open models.py file from app folder
+update it as follows to create a table in database
+
+class Student(models.Model):
+	rollno=models.CharField(max_length=30)
+	name=models.CharField(max_length=30)
+	address=models.CharField(max_length=30)
+	city=models.CharField(max_length=30)
+	class Meta:
+		db_table="Student"
+
+18. Now goto the command prompt and type two commands
+
+first command:
+python manage.py makemigrations
+
+.....it will generate the sql
+
+and
+
+second command:
+python manage.py migrate
+
+....it will apply the cahnegs in as commit in database
+
+
+19. Now open the DB Browser go to OpenDatabase...now open the db.sqlite3 file in project folder
+you will see the table which you have created
+
+20. now we will insert the data in the table
+open views.py file and update the following code
+
+def savedata(request):
+	r='R10001'
+	n='Ajay'
+	a='Gandhi Nagar'
+	c='Mumbai'
+	obj=Student(rollno=r,name=n,address=a,city=c)
+	obj.save()
+	msg="Data Saved Now"
+	return HttpResponse(msg)
+
+also import the following model on the top in the same file:
+
+from RegFirstApp.models import Student
+
+
+21.  update following two lines in urls.py file respectively
+
+from RegFirstApp.views import Hello,index,savedata
+path('savedata/',savedata)
+
+20. Now restart the web server again and open http://127.0.0.1:8000/savedata/ in browser
+21. you can check the table is updated in database on DB Browser
+
+22. now update the views.py as follows for fetching the data from database 
+
+def showdata(request):
+	obj=Student.objects.all() # return all record
+	msg="Data...<br>"
+	for res in obj:
+		msg=msg+res.rollno+"<br>"
+		msg=msg+res.name+"<br>"
+		msg=msg+res.address+"<br>"
+		msg=msg+res.city+"<br>"
+	return HttpResponse(msg)
+
+23. Now update the urls.py as follows:
+
+from django.contrib import admin
+from django.urls import path
+from RegFirstApp.views import Hello,index,savedata,showdata
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('Hello/',Hello),
+    path('index/',index),
+    path('savedata/',savedata),
+    path('showdata/',showdata)
+]
+
+24. to update the database table, add following function in views.py and also update the urls.py acccordingly
+
+def updatedata(request):
+	obj=Student.objects.get(rollno='R10001') # return all record
+	obj.name='Mukesh Kumar'
+	obj.address='Rajastha-Jaipur'
+	obj.city='Jaipur City'
+	obj.save()
+	msg="Record Updated"
+	return HttpResponse(msg)
+
+add following two lines urls.py
+from RegFirstApp.views import Hello,index,savedata,showdata,updatedata
+path('updatedata/',updatedata)
+
+
+you can now broswe the following url http://127.0.0.1:8000/updatedata/...the data will be updated in database
+
+after that you can check the updated data in database through http://127.0.0.1:8000/showdata/
+
+Data...
+R10001
+Mukesh Kumar
+Rajastha-Jaipur
+Jaipur City
+
+25. similarly we can delete the data through following function in views.py
+
+def deletedata(request):
+	obj=Student.objects.get(rollno='R10001')
+	obj.delete()
+	msg="Record deleted"
+	return HttpResponse(msg)
+
+also update the urls.data as follows:
+from django.contrib import admin
+from django.urls import path
+from RegFirstApp.views import Hello,index,savedata,showdata,updatedata,deletedata
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('Hello/',Hello),
+    path('index/',index),
+    path('savedata/',savedata),
+    path('showdata/',showdata),
+    path('updatedata/',updatedata),
+    path('deletedata/',deletedata)
+]

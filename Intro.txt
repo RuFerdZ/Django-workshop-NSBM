@@ -1,0 +1,10 @@
+Usage of data models. in django...
+
+Database is sqllite...
+
+models.py
+
+create model in models.py file
+
+makemigrations = generates sql
+migrate = apply the changes
